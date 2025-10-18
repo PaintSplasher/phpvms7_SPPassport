@@ -1,0 +1,53 @@
+.passport-flag {
+	list-style: none;
+	position: relative;
+	overflow: hidden;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: transform 0.2s ease;
+}
+
+.passport-flag:hover {
+	transform: translateY(-3px);
+}
+
+.passport-flag img {
+	transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+}
+
+.passport-flag:hover img {
+	transform: scale(1.05);
+	opacity: 0.8;
+}
+
+.passport-flag img:active {
+	transform: scale(0.95);
+	filter: brightness(0.85);
+}
+
+.passport-off {
+	filter: grayscale(100%) brightness(0.8);
+	opacity: 0.5;
+}
+
+.passport-flag .caption {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+.passport-flag:hover .caption {
+	opacity: 1;
+}
+
+.caption-text {
+	font-size: 14px;
+	font-weight: bold;
+	color: #fff;
+	text-transform: uppercase;
+}
