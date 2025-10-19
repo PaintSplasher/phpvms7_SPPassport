@@ -69,29 +69,6 @@
     </div>
 </div>
 
-@if($rival)
-<div class="row">
-    <div class="card mt-4 border-warning">
-        <div class="card-header bg-warning text-dark fw-bold">
-            @lang('sppassport::common.rival_of_the_week')
-        </div>
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <strong>@lang('sppassport::common.next_rival')</strong>
-                <a href="{{ route('frontend.users.show.public', [$rival['user_id']]) }}">
-                    {{ $rival['user_name'] }}
-                </a>
-                <span class="fi fi-{{ $rival['user_country'] }}"></span><br>
-                <small class="text-muted">
-                    @lang('sppassport::common.countries_to_overtake', ['count' => max(1, $rival['countries'] - $visitedCount)])
-                </small>
-            </div>
-            <i class="bi bi-trophy-fill text-warning fs-2"></i>
-        </div>
-    </div>
-</div>
-@endif
-
 @if(isset($recommendations))
 <div class="row">
     <div class="col-md-6">
@@ -130,11 +107,31 @@
                             <img src="{{ asset('sppassport/flags/' . strtolower($country['country']) . '.svg') }}"
                                  width="48" height="36" class="rounded shadow-sm mb-1">
                             <div class="fw-bold">{{ strtoupper($country['country']) }}</div>
-                            <small class="text-muted">{{ $country['flights'] }} @lang('sppassport::common.flights')</small>
+                            <p class="mb-0">{{ $country['flights'] }} @lang('sppassport::common.flights')</p>
                         </li>
                     @endforeach
                 </ul>
             </div>
+        </div>
+    </div>
+</div>
+@endif
+
+@if($rival)
+<div class="col-md-12">
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">@lang('sppassport::common.rival_of_the_week')</div>
+        <div class="card-body">
+            <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, $rival['countries'] - $visitedCount)])</p>
+            <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
+                <li class="text-center">
+                    <img src="{{ asset('sppassport/flags/' . strtolower($rival['user_country']) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ strtoupper($rival['user_country']) }}</div>
+                    <a href="{{ route('frontend.users.show.public', [$rival['user_id']]) }}">
+                    {{ $rival['user_name'] }}
+                </a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
