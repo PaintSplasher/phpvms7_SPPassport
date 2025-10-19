@@ -13,6 +13,8 @@ The SPPassport module tracks and visualizes a pilot’s visited countries, conti
 
 This module is fully compatible with phpVMS v7 and will work with any other module you have installed.
 
+If you’re using the Disposable Theme, you’ll find an additional folder called **DisposableTheme** in ``/modules/SPPassport/Resources/views``. Simply replace all files there with the original ones.
+
 ## Installation and Updates
 
 _Make sure the name of the folder you upload is **SPPassport**._
