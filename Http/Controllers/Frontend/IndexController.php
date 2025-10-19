@@ -12,6 +12,7 @@ use App\Models\Airport;
 use App\Models\User;
 use App\Models\Enums\PirepState;
 use Carbon\Carbon;
+use App\Support\Units\Distance;
 
 class IndexController extends Controller
 {
@@ -61,20 +62,25 @@ class IndexController extends Controller
                 ->get()
                 ->map(function ($pirep) {
                     $user = $pirep->user;
+
+                    $unit = setting('units.distance');
+
+                    $distance = new Distance($pirep->total_distance ?? 0, config('phpvms.internal_units.distance'));
+
                     return (object)[
-                        'id'              => $user->id ?? null,
-                        'name'            => $user->name_private ?? '-',
-                        'country'         => $user->country ?? null,
-                        'flights'         => $pirep->flights,
-                        'flight_time'     => $pirep->total_flight_time ?? 0,
-                        'distance'        => $pirep->total_distance ?? 0,
+                        'id'          => $user->id ?? null,
+                        'name'        => $user->name_private ?? '-',
+                        'country'     => $user->country ?? null,
+                        'flights'     => $pirep->flights,
+                        'flight_time' => $pirep->total_flight_time ?? 0,
+                        'distance'    => $distance,
                     ];
                 })
                 ->filter(fn($p) => $p->id !== null)
                 ->values();
         });
 
-    // Rare destinations — airports that are least frequently visited in all PIREPs
+        // Rare destinations — airports that are least frequently visited in all PIREPs
         $rareAirports = Cache::remember('sppassport_rare_airports', now()->addHours(6), function () {
             $pirepTable = (new Pirep)->getTable();
             $airportTable = (new Airport)->getTable();
@@ -167,17 +173,19 @@ class IndexController extends Controller
             ->filter()
             ->filter(fn($a) => in_array($a->icao, $firstAirportIcaos))
             ->unique('icao');
-        
+
         // Count unique airports visited (all, not just first per country)
         $uniqueAirports = $pireps->pluck('arr_airport')->filter()->unique('icao')->count();
 
         $totalFlights = $pireps->count();
 
         // Calculate total flight distance safely
-        $totalDistance = round(
+        $totalDistanceValue = round(
             $pireps->reduce(function ($carry, $pirep) {
                 $dist = $pirep->distance;
-                if (is_numeric($dist)) return $carry + (float) $dist;
+                if (is_numeric($dist)) {
+                    return $carry + (float) $dist;
+                }
                 if (is_object($dist) && method_exists($dist, 'internal')) {
                     return $carry + (float) $dist->internal();
                 }
@@ -186,7 +194,12 @@ class IndexController extends Controller
             1
         );
 
-        // Total flight time in minutes
+        // Wrap distance value in Distance object using current system unit
+        $unit = setting('units.distance');
+        $totalDistance = new Distance($totalDistanceValue, config('phpvms.internal_units.distance'));
+
+
+        // Calculate total flight time in minutes
         $totalFlightMinutes = $pireps->reduce(function ($carry, $pirep) {
             $time = $pirep->flight_time ?? 0;
             return $carry + (int) $time;
@@ -206,7 +219,7 @@ class IndexController extends Controller
         $totalCountries = count($allCountries);
         $progress = $totalCountries > 0 ? round(($visitedCount / $totalCountries) * 100, 2) : 0;
 
-        // Top 5 most visited countries
+        // Determine top 5 most visited countries
         $topCountries = collect($countryCounts)
             ->sortDesc()
             ->take(5)
@@ -217,14 +230,14 @@ class IndexController extends Controller
             ->values()
             ->toArray();
 
-        // Flights per month for charts
+        // Flights per month (for charts)
         $flightsPerMonth = $pireps
             ->groupBy(fn($p) => $p->created_at->format('Y-m'))
             ->map->count()
             ->sortKeys()
             ->toArray();
 
-        // Simple recommendation system — suggest unvisited countries
+        // Simple recommendation system — suggest random unvisited countries
         $visitedCountries = $countries;
         $unvisited = array_diff($allCountries, $visitedCountries);
         $recommendations = collect($unvisited)->shuffle()->take(5)->values()->toArray();
@@ -299,7 +312,7 @@ class IndexController extends Controller
             return [];
         }
 
-        // Get pirep IDs grouped by user
+        // Get PIREP IDs grouped by user
         $userPirepIds = DB::table($pirepTable)
             ->where('state', PirepState::ACCEPTED)
             ->select('user_id', 'arr_airport_id')
@@ -308,7 +321,7 @@ class IndexController extends Controller
 
         // Get all airport IDs we need
         $allAirportIds = $userPirepIds->flatMap(fn($items) => $items->pluck('arr_airport_id'))->unique()->toArray();
-        
+
         // Load all airports once
         $airports = DB::table($airportTable)
             ->whereIn('id', $allAirportIds)
@@ -320,7 +333,9 @@ class IndexController extends Controller
         $leaderboard = [];
         foreach ($userPirepIds as $userId => $pireps) {
             $stat = $userStats->get($userId);
-            if (!$stat) continue;
+            if (!$stat) {
+                continue;
+            }
 
             $countries = [];
             $airportSet = [];
@@ -335,17 +350,17 @@ class IndexController extends Controller
             }
 
             $leaderboard[] = [
-                'user_id'    => $userId,
-                'countries'  => count($countries),
-                'airports'   => count($airportSet),
-                'flights'    => (int) $stat->flights,
+                'user_id'     => $userId,
+                'countries'   => count($countries),
+                'airports'    => count($airportSet),
+                'flights'     => (int) $stat->flights,
                 'flight_time' => (int) $stat->flight_time,
-                'distance'   => round((float) $stat->distance, 1),
+                'distance'    => round((float) $stat->distance, 1),
             ];
         }
 
         // Sort by countries, then flights
-        usort($leaderboard, fn($a, $b) => 
+        usort($leaderboard, fn($a, $b) =>
             $b['countries'] <=> $a['countries'] ?: $b['flights'] <=> $a['flights']
         );
 
@@ -353,21 +368,30 @@ class IndexController extends Controller
 
         // Load top 10 users
         $userIds = array_column($top10, 'user_id');
-        $users = User::whereIn('id', $userIds)->select('id', 'name', 'country')->get()->keyBy('id');
+        $users = User::whereIn('id', $userIds)
+            ->select('id', 'name', 'country')
+            ->get()
+            ->keyBy('id');
 
-        // Final format
-        return collect($top10)->map(function ($item) use ($users) {
+        $unit = setting('units.distance');
+
+        // Final format mit Distance-Objekt
+        return collect($top10)->map(function ($item) use ($users, $unit) {
             $user = $users->get($item['user_id']);
-            return $user ? [
-                'user_id'       => $item['user_id'],
-                'user_name'     => $user->name_private,
-                'user_country'  => $user->country,
-                'countries'     => $item['countries'],
-                'airports'      => $item['airports'],
-                'flights'       => $item['flights'],
-                'flight_time'   => $item['flight_time'],
-                'distance'      => $item['distance'],
-            ] : null;
+            if (!$user) {
+                return null;
+            }
+
+            return [
+                'user_id'      => $item['user_id'],
+                'user_name'    => $user->name_private,
+                'user_country' => $user->country,
+                'countries'    => $item['countries'],
+                'airports'     => $item['airports'],
+                'flights'      => $item['flights'],
+                'flight_time'  => $item['flight_time'],
+                'distance'     => new Distance($item['distance'], config('phpvms.internal_units.distance')),
+            ];
         })->filter()->values()->toArray();
     }
 

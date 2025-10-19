@@ -39,7 +39,7 @@
                             <td>{{ optional($flight->arr_airport)->icao ?? '—' }}</td>
                             <td class="text-center">{{ $flight->dpt_time ?? '—' }}</td>
                             <td class="text-center">{{ $flight->arr_time ?? '—' }}</td>
-                            <td>{{ $flight->distance }} nmi</td>
+                            <td class="text-center">{{ $flight->distance->local(0).' '.setting('units.distance') }}</td>
                             <td class="text-center">@minutestotime($flight->flight_time ?? 0)</td>
                             <td class="text-end">
                                 <button

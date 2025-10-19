@@ -22,7 +22,7 @@
     <div class="card text-center">
         <div class="card-body">
             <div class="social-description">
-                <h2 class="card-title">{{ number_format($totalDistance, 0, ',', '.') }} {{ setting('units.distance') }}</h2>
+                <h2 class="card-title">{{ $totalDistance->local(0).' '.setting('units.distance') }}</h2>
                 <p class="card-text">@lang('sppassport::common.total_distance')</p>
             </div>
         </div>
