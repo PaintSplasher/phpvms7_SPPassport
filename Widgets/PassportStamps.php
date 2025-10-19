@@ -73,7 +73,7 @@ class PassportStamps extends Widget
         }
 
         // Format the last passport stamp date
-        $lastStampDate = optional($last_stamp->created_at)->format('d.m.Y');
+        $lastStampDate = optional(optional($last_stamp)->created_at)->format('d.m.Y') ?? '-';
 
         //  Return all processed data to the Blade view
         return view('sppassport::widgets.passport_stamps', [

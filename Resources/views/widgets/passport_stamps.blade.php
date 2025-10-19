@@ -7,9 +7,10 @@
         <div class="card my-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <span>@lang('sppassport::common.vcountries')</span>
-                <small>@lang('sppassport::common.lcountries'): {{ strtoupper($last_stamp->country ?? '—') }}</small>
+                <small>@lang('sppassport::common.lcountries'): <span class="fi fi-{{ strtolower($last_stamp->country ?? '-') }}"></span></small>
             </div>
             <div class="card-body">
+                @if(isset($last_stamp))
                 <table class="table table-responsive">
                     <thead>
                         <tr>
@@ -45,12 +46,13 @@
                         @endforeach
                     </tbody>
                 </table>
+                @endif
                 <div class="row">
                     <div class="col">
                         <div class="card text-center">
                             <div class="card-body">
                                 <div class="social-description">
-                                    <h2 class="card-title">{{ $travel_history->count() }}</h2>
+                                    <h2 class="card-title">{{ $travel_history->count() ?? '-' }}</h2>
                                     <p class="card-text">@lang('sppassport::common.visited_countries')</p>
                                 </div>
                             </div>
@@ -60,7 +62,7 @@
                         <div class="card text-center">
                             <div class="card-body">
                                 <div class="social-description">
-                                    <h2 class="card-title">{{ $bestYear }}</h2>
+                                    <h2 class="card-title">{{ $bestYear ?? '-' }}</h2>
                                     <p class="card-text">@lang('sppassport::common.best_year')</p>
                                 </div>
                             </div>
