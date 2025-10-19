@@ -92,6 +92,7 @@
 </div>
 @endif
 
+@if(isset($recommendations))
 <div class="row">
     <div class="col-md-6">
         <div class="card mt-4">
@@ -137,6 +138,7 @@
         </div>
     </div>
 </div>
+@endif
 
 @if(isset($rareAirports) && $rareAirports->isNotEmpty())
 <div class="row">

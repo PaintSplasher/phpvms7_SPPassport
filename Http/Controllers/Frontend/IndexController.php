@@ -194,10 +194,13 @@ class IndexController extends Controller
             1
         );
 
-        // Wrap distance value in Distance object using current system unit
-        $unit = setting('units.distance');
+        // Wrap distance value in Distance object using internal phpVMS unit
         $totalDistance = new Distance($totalDistanceValue, config('phpvms.internal_units.distance'));
 
+        // Failsafe: ensure totalDistance is always a valid Distance object
+        if (!$totalDistance instanceof Distance) {
+            $totalDistance = new Distance(0, config('phpvms.internal_units.distance'));
+        }
 
         // Calculate total flight time in minutes
         $totalFlightMinutes = $pireps->reduce(function ($carry, $pirep) {
@@ -263,6 +266,7 @@ class IndexController extends Controller
         ];
     }
 
+
     // Returns a default empty data structure for new users or no PIREPs.
     protected function emptyData(): array
     {
@@ -284,7 +288,7 @@ class IndexController extends Controller
             'progress'           => 0,
             'topCountries'       => [],
             'totalFlights'       => 0,
-            'totalDistance'      => 0,
+            'totalDistance'      => new Distance(0, config('phpvms.internal_units.distance')),
             'totalFlightMinutes' => 0,
             'uniqueAirports'     => 0,
             'firstFlightDate'    => null,
