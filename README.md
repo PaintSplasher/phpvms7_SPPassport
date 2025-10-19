@@ -42,5 +42,8 @@ Please use the GitHub [issue](https://github.com/PaintSplasher/phpvms7_SPPasspor
 
 ## Release / Update Notes
 
+19.OCTOBER.25
+* Disposable Theme support added
+
 18.OCTOBER.25
 * Initial Release
