@@ -5,20 +5,20 @@ namespace Modules\SPPassport\Widgets;
 use App\Contracts\Widget;
 use App\Models\PIREP;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use App\Models\Enums\PirepState;
 use Carbon\Carbon;
 
 class PassportStamps extends Widget
 {
     protected $config = [
-        'title' => 'Passport Stamps',
-        'limit' => 0, // 0 = show all countries
-        'user_id' => null, // optional override
+        'title'   => 'Passport Stamps',
+        'limit'   => 0,     // 0 = show all countries
+        'user_id' => null,  // optional override
     ];
 
     public function run()
     {
-        // Determine which user to load
+        // Determine which user to display data for
         $user = $this->config['user_id']
             ? User::find($this->config['user_id'])
             : auth()->user();
@@ -27,45 +27,53 @@ class PassportStamps extends Widget
             return 'No user selected or logged in.';
         }
 
-        // Fetch all unique destination countries from the user's accepted PIREPs
-        $countries = PIREP::where('user_id', $user->id)
-            ->join('airports as arr', 'pireps.arr_airport_id', '=', 'arr.id')
-            ->select('arr.country')
-            ->distinct()
-            ->pluck('arr.country')
+        // Load all accepted PIREPs for this user with destination airport info
+        $pireps = PIREP::with('arr_airport')
+            ->where('user_id', $user->id)
+            ->where('state', PirepState::ACCEPTED)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        if ($pireps->isEmpty()) {
+            return 'No accepted PIREPs found for this user.';
+        }
+
+        // Extract all unique destination countries
+        $countries = $pireps->pluck('arr_airport.country')
             ->filter()
             ->unique()
             ->values();
 
-        // Fetch the user's most recent flight (last passport stamp)
-        $last_stamp = PIREP::where('user_id', $user->id)
-            ->join('airports as arr', 'pireps.arr_airport_id', '=', 'arr.id')
-            ->select('arr.country', 'pireps.created_at')
-            ->orderBy('pireps.created_at', 'desc')
-            ->first();
+        // Most recent flight (last passport stamp)
+        $last_stamp = $pireps->sortByDesc('created_at')->first();
+        $lastStampDate = optional($last_stamp?->created_at)->format('d.m.Y') ?? '-';
 
-        // Build the user's travel history (first time visiting each country)
-        $travel_history = PIREP::where('user_id', $user->id)
-            ->join('airports as arr', 'pireps.arr_airport_id', '=', 'arr.id')
-            ->select('arr.country', DB::raw('MIN(pireps.created_at) as first_visit'))
-            ->groupBy('arr.country')
-            ->orderBy('first_visit', 'asc')
-            ->get();
+        // Build travel history: first visit date per country
+        $travel_history = $pireps
+            ->filter(fn($p) => optional($p->arr_airport)->country)
+            ->groupBy(fn($p) => strtoupper(trim($p->arr_airport->country)))
+            ->map(function ($flights, $country) {
+                return (object)[
+                    'country'     => $country,
+                    'first_visit' => $flights->min('created_at'),
+                ];
+            })
+            ->sortBy('first_visit')
+            ->values();
 
-        // Apply optional limit (for example, widget preview)
+        // Apply limit (useful for previews)
         if ($this->config['limit'] > 0) {
             $travel_history = $travel_history->take($this->config['limit']);
         }
 
-        // Group the travel history by year
-        $grouped = $travel_history->groupBy(function ($item) {
-            return Carbon::parse($item->first_visit)->format('Y');
-        });
+        // Group by year of first visit
+        $grouped = $travel_history->groupBy(fn($item) =>
+            Carbon::parse($item->first_visit)->format('Y')
+        );
 
-        // Calculate the user's best year (the year with the most new countries)
+        // Find best year (most new countries)
         $bestYear = null;
         $mostCountries = 0;
-
         foreach ($grouped as $year => $entries) {
             if ($entries->count() > $mostCountries) {
                 $mostCountries = $entries->count();
@@ -73,10 +81,7 @@ class PassportStamps extends Widget
             }
         }
 
-        // Format the last passport stamp date
-        $lastStampDate = optional(optional($last_stamp)->created_at)->format('d.m.Y') ?? '-';
-
-        //  Return all processed data to the Blade view
+        // Return data to Blade view
         return view('sppassport::widgets.passport_stamps', [
             'title'          => $this->config['title'],
             'countries'      => $countries,
