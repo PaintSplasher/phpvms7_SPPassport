@@ -40,24 +40,25 @@
             .then(data => {
                 L.geoJson(data, {
                     style: feature => {
-                        const iso = (feature.properties.ISO_A2 || feature.properties.iso_a2 || '').toUpperCase();
-                        const visited = pilotCountries.includes(iso);
+                        let iso = (feature.properties.ISO_A2 || feature.properties.iso_a2 || '').toUpperCase();
+                        const adminName = (feature.properties.ADMIN || feature.properties.name || '').toLowerCase();
 
-                        if (visited) {
-                            return { 
-                                color: '#2ecc71', 
-                                weight: 1, 
-                                fillColor: '#a9dfbf', 
-                                fillOpacity: 0.8 
-                            };
-                        } else {
-                            return { 
-                                color: 'transparent', 
-                                weight: 0, 
-                                fillColor: 'transparent', 
-                                fillOpacity: 0 
-                            };
+                        // Fix common GeoJSON ISO mismatches
+                        const mapFallback = {
+                            france: 'FR', norway: 'NO', denmark: 'DK', 'united kingdom': 'GB',
+                            netherlands: 'NL', taiwan: 'TW', greece: 'GR', 'ivory coast': 'CI',
+                            'south korea': 'KR', 'north korea': 'KP', russia: 'RU',
+                            'czech republic': 'CZ', 'slovakia': 'SK', 'vatican': 'VA',
+                            'kosovo': 'XK', 'laos': 'LA', 'myanmar': 'MM'
+                        };
+                        for (const [key, val] of Object.entries(mapFallback)) {
+                            if (adminName.includes(key)) iso = val;
                         }
+
+                        const visited = pilotCountries.includes(iso);
+                        return visited
+                            ? { color: '#2ecc71', weight: 1, fillColor: '#a9dfbf', fillOpacity: 0.8 }
+                            : { color: 'transparent', weight: 0, fillColor: 'transparent', fillOpacity: 0 };
                     },
                     onEachFeature: (feature, layer) => {
                         let isoLower = (feature.properties.ISO_A2 || feature.properties.iso_a2 || '').toLowerCase();
