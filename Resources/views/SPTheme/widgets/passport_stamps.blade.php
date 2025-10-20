@@ -11,8 +11,8 @@
                     @lang('sppassport::common.vcountries')
                     <span class="float-end fw-normal small">
                         @lang('sppassport::common.lcountries'):
-                        <img src="{{ asset('sppassport/flags') }}/{{ strtolower($last_stamp->country ?? '—') }}.svg"
-                                                     alt="{{ strtoupper($last_stamp->country ?? '—') }}"
+                        <img src="{{ asset('sppassport/flags') }}/{{ strtolower($last_stamp->country ?? '-') }}.svg"
+                                                     alt="{{ strtoupper($last_stamp->country ?? '-') }}"
                                                      class="rounded shadow-sm"
                                                      width="32" height="24">
                         

@@ -7,7 +7,7 @@
         <div class="card my-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <span>@lang('sppassport::common.vcountries')</span>
-                <small>@lang('sppassport::common.lcountries'): <span class="fi fi-{{ strtolower($last_stamp->country ?? '-') }}"></span></small>
+                <small>@lang('sppassport::common.lcountries'): <img src="{{ asset('sppassport/flags') }}/{{ strtolower($last_stamp->arr_airport->country ?? '-') }}.svg" alt="{{ $last_stamp->country ?? '-' }}" class="rounded shadow-sm" width="32" height="24"></small>
             </div>
             <div class="card-body">
                 @if(isset($last_stamp))

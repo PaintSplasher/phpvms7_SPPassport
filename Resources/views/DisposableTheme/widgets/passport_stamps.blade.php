@@ -56,7 +56,7 @@
 
             <div class="card-footer p-0 px-1 small">
                 @lang('sppassport::common.lcountries'):
-                {{ strtoupper($last_stamp->country ?? '—') }}
+                <img src="{{ asset('sppassport/flags') }}/{{ strtolower($last_stamp->arr_airport->country ?? '-') }}.svg" alt="{{ $last_stamp->country }}" class="rounded shadow-sm" width="32" height="24">
             </div>
         </div>
 
