@@ -25,8 +25,11 @@ class FlightSearchController extends Controller
         // Find all airport IDs within the given country
         $airportIds = Airport::where('country', $country)->pluck('id');
 
-        // Fetch flights that either depart from OR arrive in those airports
+        // Fetch flights that either depart from OR arrive in those airports,
+        // and ensure they are active and visible
         $flights = Flight::with(['dpt_airport', 'arr_airport', 'airline'])
+            ->where('active', true)
+            ->where('visible', true)
             ->where(function ($query) use ($airportIds) {
                 $query->whereIn('dpt_airport_id', $airportIds)
                       ->orWhereIn('arr_airport_id', $airportIds);
