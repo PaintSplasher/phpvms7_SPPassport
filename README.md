@@ -49,7 +49,8 @@ Please use the GitHub [issue](https://github.com/PaintSplasher/phpvms7_SPPasspor
 
 20.OCTOBER.25
 * Widget caused an error with certain databases
-* Some countries were not detected during initialization
+* Some countries were not detected during map initialization
+* Last visited country didn't get the flag
 
 20.OCTOBER.25
 * Changed the logic how the rival of the week works
