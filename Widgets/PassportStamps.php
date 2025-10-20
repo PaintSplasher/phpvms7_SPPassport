@@ -30,8 +30,9 @@ class PassportStamps extends Widget
         // Fetch all unique destination countries from the user's accepted PIREPs
         $countries = PIREP::where('user_id', $user->id)
             ->join('airports as arr', 'pireps.arr_airport_id', '=', 'arr.id')
-            ->select(DB::raw('DISTINCT arr.country as country'))
-            ->pluck('country')
+            ->select('arr.country')
+            ->distinct()
+            ->pluck('arr.country')
             ->filter()
             ->unique()
             ->values();

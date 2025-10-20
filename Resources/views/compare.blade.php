@@ -1,12 +1,12 @@
 @extends('sppassport::layouts.frontend')
-@section('title', __('sppassport::common.compare_with') . ' ' . $user->name)
+@section('title', __('sppassport::common.compare_with') . ' ' . $user->name_private)
 @section('content')
 @if(isset($sppassport_css))
   <link rel="stylesheet" href="{{ $sppassport_css }}">
 @endif
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="mb-0">@lang('sppassport::common.compare_with') {{ $user->name }}</h2>
+    <h2 class="mb-0">@lang('sppassport::common.compare_with') {{ $user->name_private }}</h2>
     <span class="float-end">
         <a href="{{ route('passport.index') }}" class="btn btn-secondary">@lang('sppassport::common.back')</a>
     </span>
@@ -31,7 +31,7 @@
 <div class="row">
     <div class="col-md-5">
         <div class="card mt-4">
-            <div class="card-header bg-primary text-white">{{ $current->name }}</div>
+            <div class="card-header bg-primary text-white">{{ $current->name_private }}</div>
             <div class="card-body">
                 <table class="table table-responsive align-middle">
                     <tbody>
@@ -95,7 +95,7 @@
 
     <div class="col-md-5">
         <div class="card mt-4">
-            <div class="card-header bg-primary text-white">{{ $user->name }}</div>
+            <div class="card-header bg-primary text-white">{{ $user->name_private }}</div>
             <div class="card-body">
                 <table class="table table-responsive align-middle">
                     <tbody>
@@ -227,7 +227,7 @@
                                 @elseif($winner === 'You')
                                     <i class="bi bi-hand-thumbs-up-fill text-success"></i> @lang('sppassport::common.you_win')
                                 @else
-                                    <i class="bi bi-hand-thumbs-down-fill text-danger"></i> @lang('sppassport::common.they_win', ['name' => $user->name])
+                                    <i class="bi bi-hand-thumbs-down-fill text-danger"></i> @lang('sppassport::common.they_win', ['name' => $user->name_private])
                                 @endif
                             </td>
                         </tr>

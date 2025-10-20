@@ -1,6 +1,6 @@
 @extends('sppassport::layouts.frontend')
 
-@section('title', __('sppassport::common.compare_with') . ' ' . $user->name)
+@section('title', __('sppassport::common.compare_with') . ' ' . $user->name_private)
 
 @section('content')
     @if(isset($sppassport_css))
@@ -28,7 +28,7 @@
         <div class="col">
             <div class="card mb-2">
                 <div class="card-header p-1">
-                    <h5 class="m-1">{{ $current->name }}</h5>
+                    <h5 class="m-1">{{ $current->name_private }}</h5>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-sm table-borderless table-striped align-middle text-nowrap">
@@ -100,7 +100,7 @@
         <div class="col">
             <div class="card mb-2">
                 <div class="card-header p-1">
-                    <h5 class="m-1">{{ $user->name }}</h5>
+                    <h5 class="m-1">{{ $user->name_private }}</h5>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-sm table-borderless table-striped align-middle text-nowrap">
@@ -252,7 +252,7 @@
                                         @lang('sppassport::common.you_win')
                                     @else
                                         <i class="fas fa-thumbs-down text-danger"></i>
-                                        @lang('sppassport::common.they_win', ['name' => $user->name])
+                                        @lang('sppassport::common.they_win', ['name' => $user->name_private])
                                     @endif
                                 </td>
                             </tr>

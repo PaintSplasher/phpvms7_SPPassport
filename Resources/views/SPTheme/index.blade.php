@@ -113,11 +113,11 @@
         <div class="card border">
             <div class="card-body">
             <h4 class="mt-0 header-title border-bottom"><i class="ph-fill ph-star align-middle fs-20 me-1"></i>@lang('sppassport::common.rival_of_the_week')</h4>
-                <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, $rival['countries'] - $visitedCount)])</p>
+                <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, ($rival->countries ?? 0) - ($visitedCount ?? 0))])</p>
                 <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
-                    <li class="text-center"><img src="{{ asset('sppassport/flags/' . strtolower($rival['user_country']) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
-                    <div class="fw-bold">{{ strtoupper($rival['user_country']) }}</div>
-                    <a href="{{ route('frontend.users.show.public', [$rival['user_id']]) }}">{{ $rival['user_name'] }}</a>
+                    <li class="text-center"><img src="{{ asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ strtoupper($rival->user_country) }}</div>
+                    <a href="{{ route('frontend.users.show.public', [$rival->user_id]) }}">{{ $rival->user_name }}</a>
                 </ul>
             </div>
         </div>
@@ -244,13 +244,13 @@
                                 @endif
                             </td>
                             <td>
-                                <span class="fi fi-{{ $entry['user_country'] }} shadow-img me-1" title="{{ $entry['user_country'] }}"></span>
-                                <a href="{{ route('frontend.users.show.public', [$entry['user_id']]) }}" class="tooltiptop" title="{{ $loop->iteration }}.">{{ $entry['user_name'] }}</a>
+                                <span class="fi fi-{{ $entry->user_country }} shadow-img me-1" title="{{ $entry->user_country }}"></span>
+                                <a href="{{ route('frontend.users.show.public', [$entry->user_id]) }}" class="tooltiptop" title="{{ $loop->iteration }}.">{{ $entry->user_name }}</a>
                             </td>
-                            <td class="text-center">{{ $entry['countries'] }}</td>
-                            <td class="text-center">{{ $entry['flights'] }}</td>
-                            <td class="text-center">@minutestotime($entry['flight_time'])</td>
-                            <td class="text-center">{{ $entry['distance']->local(0).' '.setting('units.distance') }}</td>
+                            <td class="text-center">{{ $entry->countries }}</td>
+                            <td class="text-center">{{ $entry->flights }}</td>
+                            <td class="text-center">@minutestotime($entry->flight_time)</td>
+                            <td class="text-center">{{ $entry->distance->local(0).' '.setting('units.distance') }}</td>
                         </tr>
                     @endforeach
                     </tbody>

@@ -24,31 +24,21 @@ class IndexController extends Controller
         // Cache key for the current user's dashboard data
         $cacheKey = "sppassport_dashboard_{$user->id}";
 
-        // Cache global leaderboard separately for 30 minutes
+        // Cache global leaderboard (Top 10 worldwide)
         $leaderboard = Cache::remember('sppassport_global_leaderboard', now()->addMinutes(30), function () {
-            return $this->getGlobalLeaderboard();
+            return collect($this->getGlobalLeaderboard())
+                ->map(fn($item) => (object)$item) // convert everything to objects
+                ->values();
         });
 
-        // Cache user-specific stats for 10 minutes
+        // Cache user-specific stats (dashboard data)
         $data = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($user) {
             return $this->generatePassportStats($user);
         });
 
-        // Load user list (for dropdowns, comparisons, etc.)
-        $users = User::orderBy('name')->get();
-
-        // Merge additional data
-        $data['leaderboard'] = $leaderboard;
-        $data['users'] = $users;
-
-        // Find the "Rival of the Week" (the pilot just above the current user)
-        $currentRank = collect($leaderboard)->search(fn($p) => $p['user_id'] === $user->id);
-        $rival = $currentRank > 0 ? $leaderboard[$currentRank - 1] : null;
-
-        // Weekly top pilots — count who submitted the most accepted PIREPs this week
+        // Weekly Top Pilots (Top 10 of this week)
         $weeklyTop = Cache::remember('sppassport_weekly_top', now()->addMinutes(30), function () {
-            return Pirep::with('user')
-                ->where('state', PirepState::ACCEPTED)
+            $raw = Pirep::where('state', PirepState::ACCEPTED)
                 ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
                 ->select(
                     'user_id',
@@ -58,34 +48,47 @@ class IndexController extends Controller
                 )
                 ->groupBy('user_id')
                 ->orderByDesc('flights')
-                ->take(5)
-                ->get()
-                ->map(function ($pirep) {
-                    $user = $pirep->user;
+                ->take(10)
+                ->get();
 
-                    $unit = setting('units.distance');
+            $userIds = $raw->pluck('user_id')->unique();
+            $users = User::whereIn('id', $userIds)->get()->keyBy('id');
 
-                    $distance = new Distance($pirep->total_distance ?? 0, config('phpvms.internal_units.distance'));
+            return $raw->map(function ($pirep) use ($users) {
+                $user = $users->get($pirep->user_id);
+                if (!$user) return null;
 
-                    return (object)[
-                        'id'          => $user->id ?? null,
-                        'name'        => $user->name_private ?? '-',
-                        'country'     => $user->country ?? null,
-                        'flights'     => $pirep->flights,
-                        'flight_time' => $pirep->total_flight_time ?? 0,
-                        'distance'    => $distance,
-                    ];
-                })
-                ->filter(fn($p) => $p->id !== null)
-                ->values();
+                $distance = new \App\Support\Units\Distance(
+                    $pirep->total_distance ?? 0,
+                    config('phpvms.internal_units.distance')
+                );
+
+                return (object)[
+                    'id'          => $user->id,
+                    'name'        => $user->name_private,
+                    'ident'       => $user->ident,
+                    'country'     => $user->country,
+                    'flights'     => $pirep->flights,
+                    'flight_time' => $pirep->total_flight_time ?? 0,
+                    'distance'    => $distance,
+                ];
+            })->filter()->values();
         });
+
+        // Rival of the Week – Weekly leaderboard first, global leaderboard second
+        if ($weeklyTop->contains('id', $user->id)) {
+            $currentRank = collect($weeklyTop)->search(fn($p) => $p->id === $user->id);
+            $rival = $currentRank > 0 ? $weeklyTop[$currentRank - 1] : null;
+        } else {
+            $currentRank = collect($leaderboard)->search(fn($p) => $p->user_id === $user->id);
+            $rival = $currentRank > 0 ? $leaderboard[$currentRank - 1] : null;
+        }
 
         // Rare destinations — airports that are least frequently visited in all PIREPs
         $rareAirports = Cache::remember('sppassport_rare_airports', now()->addHours(6), function () {
             $pirepTable = (new Pirep)->getTable();
             $airportTable = (new Airport)->getTable();
 
-            // Get airport visit counts
             $airportFlights = DB::table($pirepTable)
                 ->where('state', PirepState::ACCEPTED)
                 ->select('arr_airport_id')
@@ -94,16 +97,15 @@ class IndexController extends Controller
                 ->get()
                 ->keyBy('arr_airport_id');
 
-            // Get all airports and filter/sort by flight count
             $airports = DB::table($airportTable)
-                ->select('id', 'icao', 'country')
+                ->select('id', 'icao', 'country', 'name')
                 ->get();
 
-            // Map flight counts and sort
-            $rareAirports = $airports->map(function ($airport) use ($airportFlights) {
+            return $airports->map(function ($airport) use ($airportFlights) {
                 $flightCount = $airportFlights->get($airport->id)?->flights ?? 0;
-                return (object) [
+                return (object)[
                     'icao'    => $airport->icao,
+                    'name'    => $airport->name,
                     'country' => $airport->country,
                     'flights' => $flightCount,
                 ];
@@ -112,17 +114,17 @@ class IndexController extends Controller
             ->sortBy('icao')
             ->take(10)
             ->values();
-
-            return $rareAirports;
         });
 
-        // Merge competitive data into the main dataset for the Blade view
+        // User list
+        $users = User::orderBy('name')->get();
+
+        // Collect data
+        $data['leaderboard'] = $leaderboard;
+        $data['users'] = $users;
         $data['rival'] = $rival;
         $data['weeklyTop'] = $weeklyTop;
         $data['rareAirports'] = $rareAirports;
-
-        // Share all data globally with Blade partials
-        // view()->share($data);
 
         return view('sppassport::index', $data);
     }
@@ -297,7 +299,7 @@ class IndexController extends Controller
         ];
     }
 
-    // Build a global leaderboard - OPTIMIERT
+    // Build a global leaderboard - OPTIMIZED
     protected function getGlobalLeaderboard(): array
     {
         $pirepTable = (new Pirep)->getTable();
@@ -379,7 +381,7 @@ class IndexController extends Controller
 
         $unit = setting('units.distance');
 
-        // Final format mit Distance-Objekt
+        // Final format with Distance object
         return collect($top10)->map(function ($item) use ($users, $unit) {
             $user = $users->get($item['user_id']);
             if (!$user) {

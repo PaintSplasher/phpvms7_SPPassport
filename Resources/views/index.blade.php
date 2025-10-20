@@ -122,13 +122,13 @@
     <div class="card mt-4">
         <div class="card-header bg-primary text-white">@lang('sppassport::common.rival_of_the_week')</div>
         <div class="card-body">
-            <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, $rival['countries'] - $visitedCount)])</p>
+            <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, ($rival->countries ?? 0) - ($visitedCount ?? 0))])</p>
             <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
                 <li class="text-center">
-                    <img src="{{ asset('sppassport/flags/' . strtolower($rival['user_country']) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
-                    <div class="fw-bold">{{ strtoupper($rival['user_country']) }}</div>
-                    <a href="{{ route('frontend.users.show.public', [$rival['user_id']]) }}">
-                    {{ $rival['user_name'] }}
+                    <img src="{{ asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ strtoupper($rival->user_country) }}</div>
+                    <a href="{{ route('frontend.users.show.public', [$rival->user_id]) }}">
+                    {{ $rival->user_name }}
                 </a>
                 </li>
             </ul>
@@ -228,15 +228,15 @@
                             <tr>
                                 <td>{{ $loop->iteration }}.</td>
                                 <td>
-                                    <a href="{{ route('frontend.users.show.public', [$entry['user_id']]) }}">
-                                        {{ $entry['user_name'] }}
+                                    <a href="{{ route('frontend.users.show.public', [$entry->user_id]) }}">
+                                        {{ $entry->user_name }}
                                     </a>
-                                    <span class="fi fi-{{ $entry['user_country'] }}"></span>
+                                    <span class="fi fi-{{ $entry->user_country }}"></span>
                                 </td>
-                                <td class="text-center">{{ $entry['countries'] }}</td>
-                                <td class="text-center">{{ $entry['flights'] }}</td>
-                                <td class="text-center">@minutestotime($entry['flight_time'])</td>
-                                <td class="text-center">{{ $entry['distance']->local(0).' '.setting('units.distance') }}</td>
+                                <td class="text-center">{{ $entry->countries }}</td>
+                                <td class="text-center">{{ $entry->flights }}</td>
+                                <td class="text-center">@minutestotime($entry->flight_time)</td>
+                                <td class="text-center">{{ $entry->distance->local(0).' '.setting('units.distance') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
