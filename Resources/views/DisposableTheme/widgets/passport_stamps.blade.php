@@ -10,6 +10,7 @@
             </div>
 
             <div class="card-body p-0 table-responsive">
+            @if(isset($last_stamp))
                 <table class="table table-sm table-borderless table-striped align-middle text-nowrap mb-0">
                     <thead>
                         <tr>
@@ -50,6 +51,7 @@
                         @endforeach
                     </tbody>
                 </table>
+            @endif
             </div>
 
             <div class="card-footer p-0 px-1 small">
@@ -61,7 +63,7 @@
         <div class="row mt-3">
             <div class="col">
                 <div class="card text-center mb-2">
-                    <div class="card-body p-2">{{ $travel_history->count() }}</div>
+                    <div class="card-body p-2">{{ $travel_history->count() ?? '-' }}</div>
                     <div class="card-footer p-0 small fw-bold">
                         @lang('sppassport::common.visited_countries')
                     </div>
@@ -70,7 +72,7 @@
 
             <div class="col">
                 <div class="card text-center mb-2">
-                    <div class="card-body p-2">{{ $bestYear }}</div>
+                    <div class="card-body p-2">{{ $bestYear ?? '-' }}</div>
                     <div class="card-footer p-0 small fw-bold">
                         @lang('sppassport::common.best_year')
                     </div>

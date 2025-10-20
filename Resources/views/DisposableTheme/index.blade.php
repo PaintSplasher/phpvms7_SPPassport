@@ -73,6 +73,7 @@
     </div>
 </div>
 
+@if(isset($recommendations))
 <div class="row">
     <div class="col">
         <div class="card mb-2">
@@ -97,7 +98,7 @@
             </div>
         </div>
     </div>
-    @if($rival)
+    @if(isset($rival))
     <div class="col">
         <div class="card mb-2">
             <div class="card-header bg-warning p-1">
@@ -140,8 +141,9 @@
         </div>
     </div>
 </div>
+@endif
 
-@if(isset($rareAirports) && $rareAirports->isNotEmpty())
+@if(isset($rareAirports))
 <div class="row">
     <div class="col-md-12">
         <div class="card mb-2">
@@ -199,7 +201,7 @@
                                 </td>
                                 <td class="text-center">{{ $pilot->flights }} @lang('sppassport::common.new_flights')</td>
                                 <td class="text-center">@minutestotime($pilot->flight_time)</td>
-                                <td class="text-center">{{ number_format($pilot->distance, 0, ',', '.') }} {{ setting('units.distance') }}</td>
+                                <td class="text-center">{{ $pilot->distance->local(0).' '.setting('units.distance') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -213,8 +215,7 @@
 </div>
 @endif
 
-
-@if(isset($weeklyTop) && $weeklyTop->isNotEmpty())
+@if(isset($leaderboard))
 <div class="row">
     <div class="col-md-12">
         <div class="card mb-2">
@@ -246,7 +247,7 @@
                                 <td class="text-center">{{ $entry['countries'] }}</td>
                                 <td class="text-center">{{ $entry['flights'] }}</td>
                                 <td class="text-center">@minutestotime($entry['flight_time'])</td>
-                                <td class="text-center">{{ number_format($entry['distance'], 0, ',', '.') }} {{ setting('units.distance') }}</td>
+                                <td class="text-center">{{ $entry['distance']->local(0).' '.setting('units.distance') }}</td>
                             </tr>
                         @endforeach
                     </tbody>

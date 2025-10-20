@@ -18,7 +18,7 @@
                         
                     </span>
                 </h4>
-
+                @if(isset($last_stamp))
                 <table class="table table-striped table-hover table-responsive">
                     <thead>
                         <tr>
@@ -54,6 +54,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                @endif
             </div>
         </div>
     </div>
@@ -63,7 +64,7 @@
             <div class="card border">
                 <div class="card-body widget-desk">
                     <div class="text-end">
-                        <h4 class="mt-0 mb-0 fw-bold">{{ $travel_history->count() }}</h4>
+                        <h4 class="mt-0 mb-0 fw-bold">{{ $travel_history->count() ?? '-' }}</h4>
                         <p class="mb-0">@lang('sppassport::common.visited_countries')</p>
                     </div>
                     <div class="widget-icon">
@@ -78,7 +79,7 @@
             <div class="card border">
                 <div class="card-body widget-desk">
                     <div class="text-end">
-                        <h4 class="mt-0 mb-0 fw-bold">{{ $bestYear }}</h4>
+                        <h4 class="mt-0 mb-0 fw-bold">{{ $bestYear ?? '-' }}</h4>
                         <p class="mb-0">@lang('sppassport::common.best_year')</p>
                     </div>
                     <div class="widget-icon">

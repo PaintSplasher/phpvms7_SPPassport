@@ -87,7 +87,7 @@
     </div>
 </div>
 
-
+@if(isset($recommendations))
 <div class="row">
     <div class="col">
         <div class="card border">
@@ -108,14 +108,14 @@
             </div>
         </div>
     </div>
-    @if($rival)
+    @if(isset($rival))
     <div class="col">
         <div class="card border">
             <div class="card-body">
             <h4 class="mt-0 header-title border-bottom"><i class="ph-fill ph-star align-middle fs-20 me-1"></i>@lang('sppassport::common.rival_of_the_week')</h4>
                 <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, $rival['countries'] - $visitedCount)])</p>
                 <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
-                    <li><img src="{{ asset('sppassport/flags/' . strtolower($rival['user_country']) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <li class="text-center"><img src="{{ asset('sppassport/flags/' . strtolower($rival['user_country']) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
                     <div class="fw-bold">{{ strtoupper($rival['user_country']) }}</div>
                     <a href="{{ route('frontend.users.show.public', [$rival['user_id']]) }}">{{ $rival['user_name'] }}</a>
                 </ul>
@@ -147,8 +147,9 @@
         </div>
     </div>
 </div> 
+@endif
 
-@if(isset($rareAirports) && $rareAirports->isNotEmpty())
+@if(isset($rareAirports))
 <div class="row">
    <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
         <div class="card border">
@@ -204,7 +205,7 @@
                             </td>
                             <td class="text-center">{{ $pilot->flights }} @lang('sppassport::common.new_flights')</td>
                             <td class="text-center">@minutestotime($pilot->flight_time)</td>
-                            <td class="text-center">{{ (int) $pilot->distance }} {{ setting('units.distance') }}</td>
+                            <td class="text-center">{{ $pilot->distance->local(0).' '.setting('units.distance') }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -214,6 +215,8 @@
     </div>
 </div>
 @endif
+
+@if(isset($leaderboard))
 <div class="row">
    <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12">
         <div class="card border">
@@ -247,7 +250,7 @@
                             <td class="text-center">{{ $entry['countries'] }}</td>
                             <td class="text-center">{{ $entry['flights'] }}</td>
                             <td class="text-center">@minutestotime($entry['flight_time'])</td>
-                            <td class="text-center">{{ (int) $entry['distance'] }} {{ setting('units.distance') }}</td>
+                            <td class="text-center">{{ $entry['distance']->local(0).' '.setting('units.distance') }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -256,9 +259,7 @@
         </div>
     </div>
 </div>
-
-
-
+@endif
 
 @endsection
 

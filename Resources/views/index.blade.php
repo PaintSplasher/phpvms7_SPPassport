@@ -117,7 +117,7 @@
 </div>
 @endif
 
-@if($rival)
+@if(isset($rival))
 <div class="col-md-12">
     <div class="card mt-4">
         <div class="card-header bg-primary text-white">@lang('sppassport::common.rival_of_the_week')</div>
@@ -137,7 +137,7 @@
 </div>
 @endif
 
-@if(isset($rareAirports) && $rareAirports->isNotEmpty())
+@if(isset($rareAirports))
 <div class="row">
     <div class="col-md-12">
         <div class="card mt-4">
@@ -203,7 +203,7 @@
 </div>
 @endif
 
-@if(isset($leaderboard) && !empty($leaderboard))
+@if(isset($leaderboard))
 <div class="row">
     <div class="col-md-12">
         <div class="card mt-4">

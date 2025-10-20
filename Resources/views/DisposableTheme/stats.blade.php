@@ -12,7 +12,7 @@
     </div>
     <div class="col">
         <div class="card text-center mb-2">
-            <div class="card-body p-2">{{ number_format($totalDistance, 0, ',', '.') }} {{ setting('units.distance') }}</div>
+            <div class="card-body p-2">{{ $totalDistance->local(0).' '.setting('units.distance') }}</div>
             <div class="card-footer p-0 small fw-bold">@lang('sppassport::common.total_distance')</div>
         </div>
     </div>

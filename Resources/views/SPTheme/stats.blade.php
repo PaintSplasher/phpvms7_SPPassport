@@ -30,7 +30,7 @@
     <div class="card border">
         <div class="card-body widget-desk">
             <div class="text-end">
-                <h4 class="mt-0 mb-0 fw-bold">{{ (int) $totalDistance }} {{ setting('units.distance') }}</h4>
+                <h4 class="mt-0 mb-0 fw-bold">{{ $totalDistance->local(0).' '.setting('units.distance') }}</h4>
                 <p class="mb-0">@lang('sppassport::common.total_distance')</p>
             </div>
             <div class="widget-icon">
