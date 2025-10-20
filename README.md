@@ -48,6 +48,10 @@ Please use the GitHub [issue](https://github.com/PaintSplasher/phpvms7_SPPasspor
 ## Release / Update Notes
 
 20.OCTOBER.25
+* Widget caused an error with certain databases
+* Some countries were not detected during initialization
+
+20.OCTOBER.25
 * Changed the logic how the rival of the week works
 * Some fixes for private usernames
 
