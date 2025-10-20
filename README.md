@@ -48,6 +48,10 @@ Please use the GitHub [issue](https://github.com/PaintSplasher/phpvms7_SPPasspor
 ## Release / Update Notes
 
 20.OCTOBER.25
+* Changed the logic how the rival of the week works
+* Some fixes for private usernames
+
+20.OCTOBER.25
 * SPTheme support added
 * Make distance be consistent - nmi, km, miles
 * Added failsafe for pilots with zero flights
