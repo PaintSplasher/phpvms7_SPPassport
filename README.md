@@ -44,6 +44,13 @@ Please use the GitHub [issue](https://github.com/PaintSplasher/phpvms7_SPPasspor
 
 ## Release / Update Notes
 
+20.OCTOBER.25
+* SPTheme support added
+* Make distance be consistent - nmi, km, miles
+* Added failsafe for pilots with zero flights
+* Added failsafe for the widget
+* Some fixes for the rival of the week
+
 19.OCTOBER.25
 * Disposable Theme support added
 
