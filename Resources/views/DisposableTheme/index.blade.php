@@ -143,7 +143,7 @@
 </div>
 @endif
 
-@if(isset($rareAirports))
+@if(isset($rareCountries))
 <div class="row">
     <div class="col-md-12">
         <div class="card mb-2">
@@ -152,12 +152,12 @@
             </div>
             <div class="card-body">
                 <ul class="list-inline d-flex flex-wrap justify-content-center gap-5 mb-0">
-                    @foreach($rareAirports as $airport)
+                    @foreach($rareCountries as $airport)
                         <li class="text-center">
                             <img src="{{ asset('sppassport/flags/' . strtolower($airport->country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
                             <div class="fw-bold">{{ strtoupper($airport->country) }}</div>
-                            <a href="{{ route('frontend.airports.show', [$airport->icao]) }}">
-                                {{ $airport->icao }}
+                            <a href="{{ route('passport.flights.country', ['country' => strtoupper($airport->country)]) }}">
+                                @lang('sppassport::common.search')
                             </a>
                         </li>
                     @endforeach

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use App\Models\Flight;
 use App\Models\Pirep;
 use App\Models\Airport;
 use App\Models\User;
@@ -84,37 +85,50 @@ class IndexController extends Controller
             $rival = $currentRank > 0 ? $leaderboard[$currentRank - 1] : null;
         }
 
-        // Rare destinations — airports that are least frequently visited in all PIREPs
-        $rareAirports = Cache::remember('sppassport_rare_airports', now()->addHours(6), function () {
-            $pirepTable = (new Pirep)->getTable();
-            $airportTable = (new Airport)->getTable();
+// Rare destinations — least visited countries (only those that have active/visible flights)
+$rareCountries = Cache::remember('sppassport_rare_countries', now()->addHours(6), function () {
+    $pirepTable   = (new Pirep)->getTable();
+    $airportTable = (new Airport)->getTable();
+    $flightsTable = (new Flight)->getTable();
 
-            $airportFlights = DB::table($pirepTable)
-                ->where('state', PirepState::ACCEPTED)
-                ->select('arr_airport_id')
-                ->selectRaw('COUNT(*) as flights')
-                ->groupBy('arr_airport_id')
-                ->get()
-                ->keyBy('arr_airport_id');
+    // 1) Finde alle Länder, in denen es mindestens einen aktiven & sichtbaren Flug gibt
+    $countriesWithFlights = DB::table($flightsTable)
+        ->join($airportTable, function ($join) use ($airportTable, $flightsTable) {
+            $join->on("$flightsTable.dpt_airport_id", '=', "$airportTable.id")
+                 ->orOn("$flightsTable.arr_airport_id", '=', "$airportTable.id");
+        })
+        ->where("$flightsTable.active", true)
+        ->where("$flightsTable.visible", true)
+        ->whereNotNull("$airportTable.country")
+        ->select("$airportTable.country")
+        ->distinct()
+        ->pluck('country')
+        ->map(fn($c) => strtoupper(trim($c)))
+        ->toArray();
 
-            $airports = DB::table($airportTable)
-                ->select('id', 'icao', 'country', 'name')
-                ->get();
+    if (empty($countriesWithFlights)) {
+        return collect();
+    }
 
-            return $airports->map(function ($airport) use ($airportFlights) {
-                $flightCount = $airportFlights->get($airport->id)?->flights ?? 0;
-                return (object)[
-                    'icao'    => $airport->icao,
-                    'name'    => $airport->name,
-                    'country' => $airport->country,
-                    'flights' => $flightCount,
-                ];
-            })
-            ->sortBy('flights')
-            ->sortBy('icao')
-            ->take(10)
-            ->values();
-        });
+    // 2) Zähle alle akzeptierten PIREPs pro Land, aber nur für Länder mit vorhandenen Flügen
+    $countryTotals = DB::table($pirepTable)
+        ->join($airportTable, "$airportTable.id", '=', "$pirepTable.arr_airport_id")
+        ->where("$pirepTable.state", PirepState::ACCEPTED)
+        ->whereIn(DB::raw('UPPER(TRIM(' . $airportTable . '.country))'), $countriesWithFlights)
+        ->select(DB::raw('UPPER(TRIM(' . $airportTable . '.country)) as country'))
+        ->selectRaw('COUNT(*) as total_flights')
+        ->groupBy('country')
+        ->orderBy('total_flights', 'asc')
+        ->limit(10)
+        ->get()
+        ->map(fn($row) => (object)[
+            'country' => $row->country,
+            'flights' => (int) $row->total_flights,
+        ]);
+
+    return $countryTotals;
+});
+
 
         // User list
         $users = User::orderBy('name')->get();
@@ -124,7 +138,7 @@ class IndexController extends Controller
         $data['users'] = $users;
         $data['rival'] = $rival;
         $data['weeklyTop'] = $weeklyTop;
-        $data['rareAirports'] = $rareAirports;
+        $data['rareCountries'] = $rareCountries;
 
         return view('sppassport::index', $data);
     }
