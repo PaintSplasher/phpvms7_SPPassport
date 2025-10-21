@@ -39,7 +39,7 @@
                             </td>
                             <td>
                                 <a href="{{ url('/flights/'.$flight->id) }}" class="text-decoration-none">
-                                    {{ $flight->ident }}
+                                    {{ $flight->ident ?? '-'}}
                                 </a>
                             </td>                         
                             <td class="text-center"><a href="{{ route('frontend.airports.show', [optional($flight->dpt_airport)->icao]) }}" title="{{ optional($flight->dpt_airport)->icao }}" class="badge badge-rounded badge-primary tooltiptop"><i class="ph-fill ph-airplane-takeoff"></i> {{ optional($flight->dpt_airport)->icao }}</a></td>

@@ -32,7 +32,7 @@
                             <td>{{ $flight->airline->icao ?? '—' }}</td>
                             <td>
                                 <a href="{{ url('/flights/'.$flight->id) }}" class="text-decoration-none">
-                                    {{ $flight->ident }}
+                                    {{ $flight->ident ?? '-'}}
                                 </a>
                             </td>
                             <td>{{ optional($flight->dpt_airport)->icao ?? '—' }}</td>
