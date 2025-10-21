@@ -66,9 +66,12 @@ class IndexController extends Controller
 
                 return (object)[
                     'id'          => $user->id,
+                    'user_id'     => $user->id,
                     'name'        => $user->name_private,
+                    'user_name'   => $user->name_private,
                     'ident'       => $user->ident,
                     'country'     => $user->country,
+                    'user_country'=> $user->country,
                     'flights'     => $pirep->flights,
                     'flight_time' => $pirep->total_flight_time ?? 0,
                     'distance'    => $distance,
