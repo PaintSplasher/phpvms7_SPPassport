@@ -1,10 +1,18 @@
 {
     "name": "SPPassport",
     "alias": "sppassport",
-    "description": "",
+    "description": "phpVMS v7 module for a personal Passport feature",
+    "version": "1.2.3",
+    "readme_url": "https://github.com/PaintSplasher/phpvms7_SPPassport?tab=readme-ov-file",
+    "license_url": "https://github.com/PaintSplasher/phpvms7_SPPassport?tab=License-1-ov-file",
+    "attribution": {
+        "text": "SPTransfer by Sass-Projects",
+        "url": "https://github.com/PaintSplasher/phpvms7_SPPassport",
+        "img": null
+    },
     "keywords": [],
-    "active": 1,
-    "order": 0,
+    "active": 0,
+    "order": 9001,
     "providers": [
         "Modules\\SPPassport\\Providers\\AppServiceProvider",
         "Modules\\SPPassport\\Providers\\EventServiceProvider",
