@@ -125,8 +125,8 @@
             <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, ($rival->countries ?? 0) - ($visitedCount ?? 0))])</p>
             <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
                 <li class="text-center">
-                    <img src="{{ asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
-                    <div class="fw-bold">{{ strtoupper($rival->user_country) }}</div>
+                    <img src="{{ $rival->user_country ? asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') : '' }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ $rival->user_country ? strtoupper($rival->user_country) : '' }}</div>
                     <a href="{{ route('frontend.users.show.public', [$rival->user_id]) }}">
                     {{ $rival->user_name }}
                 </a>
