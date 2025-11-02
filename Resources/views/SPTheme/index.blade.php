@@ -115,8 +115,8 @@
             <h4 class="mt-0 header-title border-bottom"><i class="ph-fill ph-star align-middle fs-20 me-1"></i>@lang('sppassport::common.rival_of_the_week')</h4>
                 <p>@lang('sppassport::common.countries_to_overtake', ['count' => max(1, ($rival->countries ?? 0) - ($visitedCount ?? 0))])</p>
                 <ul class="list-inline d-flex flex-wrap justify-content-center gap-5">
-                    <li class="text-center"><img src="{{ asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
-                    <div class="fw-bold">{{ strtoupper($rival->user_country) }}</div>
+                    <li class="text-center"><img src="{{ $rival->user_country ? asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') : '' }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ $rival->user_country ? strtoupper($rival->user_country) : '' }}</div>
                     <a href="{{ route('frontend.users.show.public', [$rival->user_id]) }}">{{ $rival->user_name }}</a>
                 </ul>
             </div>

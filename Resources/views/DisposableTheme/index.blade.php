@@ -106,8 +106,8 @@
             </div>
             <div class="card-body text-center">
                 <ul class="list-inline d-flex flex-wrap justify-content-center mb-0">
-                    <li><img src="{{ asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') }}" width="48" height="36" class="rounded shadow-sm mb-1">
-                    <div class="fw-bold">{{ strtoupper($rival->user_country) }}</div>
+                    <li><img src="{{ $rival->user_country ? asset('sppassport/flags/' . strtolower($rival->user_country) . '.svg') : '' }}" width="48" height="36" class="rounded shadow-sm mb-1">
+                    <div class="fw-bold">{{ $rival->user_country ? strtoupper($rival->user_country) : '' }}</div>
                     <a href="{{ route('frontend.users.show.public', [$rival->user_id]) }}">{{ $rival->user_name }}</a>
                 </li>
             </ul>
